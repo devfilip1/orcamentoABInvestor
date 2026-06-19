@@ -1,0 +1,1449 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AB | Proposta de Preços</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #07070e;
+        --text: #ededf5;
+        --muted: #b8b8d8;
+        --dim: #7070a0;
+        --faint: #14141f;
+        --gold: #c9922a;
+        --gold-l: #e8b84b;
+        --gold-dim: rgba(201, 146, 42, 0.12);
+        --violet: #7c3aed;
+        --violet-l: #a78bfa;
+        --red: #e05252;
+        --green: #22c55e;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+        overflow: hidden;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      .deck {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 96px;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.55s var(--ease),
+          transform 0.55s var(--ease);
+        transform: translateY(10px);
+      }
+      .slide.active {
+        opacity: 1;
+        pointer-events: all;
+        transform: translateY(0);
+      }
+
+      /* entrance */
+      @keyframes up {
+        from {
+          opacity: 0;
+          transform: translateY(28px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fade {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      [data-a] {
+        opacity: 0;
+      }
+      [data-a].go {
+        animation: up 0.7s var(--ease) forwards;
+      }
+      [data-f] {
+        opacity: 0;
+      }
+      [data-f].go {
+        animation: fade 0.9s ease forwards;
+      }
+
+      /* typography helpers */
+      .serif-i {
+        font-style: italic;
+        font-weight: 300;
+        letter-spacing: -0.01em;
+      }
+      .small-cap {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .mono {
+        font-family: "Courier New", monospace;
+      }
+
+      /* horizontal rule */
+      .rule {
+        width: 100%;
+        height: 1px;
+        background: var(--dim);
+        margin: 0;
+      }
+
+      /* gold gradient text */
+      .gt {
+        background: linear-gradient(120deg, var(--gold-l), var(--gold));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* slash separator */
+      .slash {
+        color: var(--dim);
+        font-weight: 300;
+        margin: 0 6px;
+      }
+
+      /* strikethrough */
+      .strike {
+        position: relative;
+        color: var(--muted);
+      }
+      .strike::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 2px;
+        background: var(--red);
+        transform: rotate(-4deg);
+      }
+
+      /* pill */
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 14px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+      }
+      .pill-g {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--green);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+      }
+      .pill-v {
+        background: rgba(124, 58, 237, 0.1);
+        color: var(--violet-l);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+      }
+      .pill-gold {
+        background: var(--gold-dim);
+        color: var(--gold-l);
+        border: 1px solid rgba(201, 146, 42, 0.25);
+      }
+
+      /* nav */
+      .nav {
+        position: fixed;
+        bottom: 24px;
+        left: 80px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        z-index: 200;
+      }
+      .nav-dots {
+        display: flex;
+        gap: 6px;
+      }
+      .nav-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--dim);
+        transition:
+          background 0.3s,
+          width 0.3s;
+        cursor: pointer;
+      }
+      .nav-dot.on {
+        background: var(--gold);
+        width: 18px;
+        border-radius: 3px;
+      }
+      .nav-key {
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+      }
+
+      /* price big */
+      .price-big {
+        font-size: clamp(56px, 7vw, 96px);
+        font-weight: 900;
+        line-height: 0.9;
+        letter-spacing: -0.05em;
+      }
+      .price-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-top: 8px;
+      }
+
+      /* item row */
+      .item {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--dim);
+      }
+      .item:last-child {
+        border-bottom: none;
+      }
+      .item-name {
+        font-size: 15px;
+        font-weight: 500;
+      }
+      .item-sub {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .item-val {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--gold-l);
+        white-space: nowrap;
+        margin-left: 20px;
+      }
+
+      /* comparison col */
+      .col-box {
+        border: 1px solid var(--dim);
+        border-radius: 12px;
+        padding: 28px 24px;
+        background: rgba(255, 255, 255, 0.01);
+      }
+      .col-box.highlight {
+        border-color: rgba(201, 146, 42, 0.35);
+        background: rgba(201, 146, 42, 0.04);
+        box-shadow: 0 0 48px rgba(201, 146, 42, 0.06);
+      }
+
+      /* quote line */
+      .q {
+        font-size: clamp(22px, 2.8vw, 36px);
+        font-weight: 300;
+        font-style: italic;
+        line-height: 1.35;
+        letter-spacing: -0.01em;
+        color: var(--text);
+      }
+      .q strong {
+        font-style: normal;
+        font-weight: 800;
+        color: var(--gold-l);
+      }
+
+      /* footnote */
+      .fn {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      /* vertical label */
+      .v-label {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck">
+      <!-- ===== S1 COVER ===== -->
+      <div class="slide active" style="padding: 0 96px">
+        <!-- ambient glow -->
+        <div
+          style="
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(120px);
+            background: rgba(201, 146, 42, 0.07);
+            bottom: -100px;
+            right: -60px;
+            pointer-events: none;
+          "
+        ></div>
+
+        <div style="max-width: 800px">
+          <div class="small-cap" data-a style="margin-bottom: 32px">
+            AB | Private Investor Access &nbsp;·&nbsp; Proposta Comercial
+          </div>
+
+          <div
+            style="
+              font-size: clamp(42px, 5.5vw, 76px);
+              font-weight: 900;
+              line-height: 0.95;
+              letter-spacing: -0.04em;
+              margin-bottom: 4px;
+            "
+            data-a
+          >
+            Transparência
+          </div>
+          <div
+            style="
+              font-size: clamp(42px, 5.5vw, 76px);
+              font-weight: 900;
+              line-height: 0.95;
+              letter-spacing: -0.04em;
+              margin-bottom: 4px;
+              font-style: italic;
+              font-weight: 300;
+            "
+            data-a
+          >
+            tem um preço.
+          </div>
+          <div
+            style="
+              font-size: clamp(18px, 2.2vw, 28px);
+              font-weight: 400;
+              color: var(--muted);
+              margin-top: 28px;
+              line-height: 1.6;
+              max-width: 520px;
+            "
+            data-a
+          >
+            E ele é bem mais justo do que você imagina —<br />
+            especialmente considerando o que está em jogo.
+          </div>
+
+          <div
+            style="
+              margin-top: 48px;
+              display: flex;
+              align-items: center;
+              gap: 20px;
+            "
+            data-a
+          >
+            <span class="pill pill-gold">Proposta Especial de Lançamento</span>
+            <span style="font-size: 12px; color: var(--muted)"
+              >Válida para implementação em Julho 2026</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S2 ANTES DO PREÇO ===== -->
+      <div class="slide">
+        <div style="max-width: 680px">
+          <div class="small-cap" data-a style="margin-bottom: 40px">
+            Antes de falar em número
+          </div>
+
+          <p class="q" data-a>
+            Você não está comprando <strong>software.</strong>
+          </p>
+          <p class="q" data-a style="margin-top: 16px">
+            Está comprando a <strong>credibilidade</strong> que seus
+            investidores já mereciam há anos.
+          </p>
+
+          <div
+            style="
+              margin-top: 48px;
+              padding-top: 40px;
+              border-top: 1px solid var(--dim);
+            "
+            data-a
+          >
+            <p
+              style="
+                font-size: 15px;
+                color: var(--muted);
+                line-height: 1.8;
+                max-width: 520px;
+              "
+            >
+              Cada vez que um investidor liga perguntando onde está o dinheiro
+              dele,<br />
+              cada planilha enviada por WhatsApp,<br />
+              cada reunião para explicar o que poderia estar numa tela —<br />
+              <strong style="color: var(--text)"
+                >isso tem um custo invisível que nenhuma tabela de preços
+                captura.</strong
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S3 O QUE É CONSTRUÍDO ===== -->
+      <div class="slide">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 80px;
+            align-items: start;
+            padding-top: 20px;
+          "
+        >
+          <div>
+            <div class="small-cap" data-a style="margin-bottom: 24px">
+              O que está sendo entregue
+            </div>
+            <p
+              style="font-size: 15px; color: var(--muted); line-height: 1.8"
+              data-a
+            >
+              Uma plataforma desenvolvida do zero, exclusivamente para a AB
+              Construtora. Cada tela, cada regra, cada detalhe — pensado para
+              vocês. Não é template. Não é SaaS. É seu.
+            </p>
+            <div
+              style="
+                margin-top: 32px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+              "
+              data-a
+            >
+              <span class="pill pill-v">100% exclusivo</span>
+              <span class="pill pill-gold" style="margin-top: 4px"
+                >Personalizado para a AB</span
+              >
+            </div>
+          </div>
+
+          <div data-a>
+            <div class="rule" style="margin-bottom: 0"></div>
+            <div class="item">
+              <div>
+                <div class="item-name">Design de Interface</div>
+                <div class="item-sub">
+                  Sistema de design, todas as telas, componentes
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Frontend — Next.js + React</div>
+                <div class="item-sub">
+                  Portal do investidor, MVVM, TypeScript
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Backend — API Completa</div>
+                <div class="item-sub">
+                  Autenticação, dados, permissões por perfil
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Banco de Dados</div>
+                <div class="item-sub">
+                  Modelagem, entidades, relacionamentos
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Infraestrutura & Deploy</div>
+                <div class="item-sub">
+                  Configuração de servidor, domínio, SSL
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">6 Módulos Funcionais</div>
+                <div class="item-sub">
+                  Dashboard, Empreendimentos, Financeiro, Jurídico,
+                  Notificações, Selo
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">App Mobile + Web (PWA)</div>
+                <div class="item-sub">
+                  Android, iPhone e navegador — sem App Store, sem Google Play,
+                  sem custo extra
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S4 VALOR DE MERCADO ===== -->
+      <div class="slide">
+        <div class="small-cap" data-a style="margin-bottom: 36px">
+          Se você fosse montar um time hoje
+        </div>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0;
+            border: 1px solid var(--dim);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 32px;
+          "
+          data-a
+        >
+          <div style="padding: 28px 24px; border-right: 1px solid var(--dim)">
+            <div
+              style="
+                font-size: 11px;
+                color: var(--muted);
+                margin-bottom: 12px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+              "
+            >
+              Designer UI/UX
+            </div>
+            <div
+              style="
+                font-size: 13px;
+                color: var(--muted);
+                margin-bottom: 16px;
+                line-height: 1.6;
+              "
+            >
+              40h × R$ 90/h<br />Sistema visual completo
+            </div>
+            <div style="font-size: 28px; font-weight: 800; color: var(--text)">
+              R$ 3.600
+            </div>
+          </div>
+          <div style="padding: 28px 24px; border-right: 1px solid var(--dim)">
+            <div
+              style="
+                font-size: 11px;
+                color: var(--muted);
+                margin-bottom: 12px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+              "
+            >
+              Dev Frontend
+            </div>
+            <div
+              style="
+                font-size: 13px;
+                color: var(--muted);
+                margin-bottom: 16px;
+                line-height: 1.6;
+              "
+            >
+              60h × R$ 110/h<br />Portal completo, 6 módulos
+            </div>
+            <div style="font-size: 28px; font-weight: 800; color: var(--text)">
+              R$ 6.600
+            </div>
+          </div>
+          <div style="padding: 28px 24px">
+            <div
+              style="
+                font-size: 11px;
+                color: var(--muted);
+                margin-bottom: 12px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+              "
+            >
+              Dev Backend
+            </div>
+            <div
+              style="
+                font-size: 13px;
+                color: var(--muted);
+                margin-bottom: 16px;
+                line-height: 1.6;
+              "
+            >
+              40h × R$ 110/h<br />API, banco, autenticação
+            </div>
+            <div style="font-size: 28px; font-weight: 800; color: var(--text)">
+              R$ 4.400
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          "
+          data-a
+        >
+          <div>
+            <div class="small-cap" style="margin-bottom: 8px">
+              Custo de mercado estimado
+            </div>
+            <div
+              style="
+                font-size: clamp(40px, 5vw, 68px);
+                font-weight: 900;
+                letter-spacing: -0.04em;
+                color: var(--muted);
+              "
+            >
+              R$ 14.600<span
+                style="font-size: 0.35em; font-weight: 400; margin-left: 8px"
+                >+ infraestrutura</span
+              >
+            </div>
+          </div>
+          <div style="text-align: right; max-width: 260px">
+            <p class="fn">
+              Este é o custo real de contratar profissionais de mercado para
+              construir o que estamos entregando. E nem estamos contando meses
+              de gerenciamento.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S5 PREÇO DE TABELA (ÂNCORA) ===== -->
+      <div class="slide">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+          "
+        >
+          <div>
+            <div class="small-cap" data-a style="margin-bottom: 32px">
+              Nosso preço de tabela
+            </div>
+            <div style="margin-bottom: 40px" data-a>
+              <div
+                class="small-cap"
+                style="margin-bottom: 10px; color: var(--dim)"
+              >
+                Implementação
+              </div>
+              <div class="price-big" style="color: var(--text)">R$ 6.800</div>
+              <div class="price-label">pagamento único</div>
+            </div>
+            <div data-a>
+              <div
+                class="small-cap"
+                style="margin-bottom: 10px; color: var(--dim)"
+              >
+                Mensalidade
+              </div>
+              <div class="price-big" style="color: var(--text)">
+                R$ 590<span
+                  style="
+                    font-size: 0.4em;
+                    font-weight: 400;
+                    color: var(--muted);
+                  "
+                  >/mês</span
+                >
+              </div>
+              <div class="price-label">servidor + suporte + manutenção</div>
+            </div>
+          </div>
+
+          <div data-a>
+            <div
+              style="
+                padding: 32px;
+                background: var(--faint);
+                border-radius: 12px;
+                border: 1px solid var(--dim);
+              "
+            >
+              <div class="small-cap" style="margin-bottom: 20px">
+                O que está no preço cheio
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 14px">
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      width: 6px;
+                      height: 6px;
+                      border-radius: 50%;
+                      background: var(--muted);
+                      flex-shrink: 0;
+                    "
+                  ></div>
+                  <span style="font-size: 14px; color: var(--muted)"
+                    >6 módulos completos desenvolvidos</span
+                  >
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      width: 6px;
+                      height: 6px;
+                      border-radius: 50%;
+                      background: var(--muted);
+                      flex-shrink: 0;
+                    "
+                  ></div>
+                  <span style="font-size: 14px; color: var(--muted)"
+                    >Sistema de design exclusivo</span
+                  >
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      width: 6px;
+                      height: 6px;
+                      border-radius: 50%;
+                      background: var(--muted);
+                      flex-shrink: 0;
+                    "
+                  ></div>
+                  <span style="font-size: 14px; color: var(--muted)"
+                    >Backend + banco de dados</span
+                  >
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      width: 6px;
+                      height: 6px;
+                      border-radius: 50%;
+                      background: var(--muted);
+                      flex-shrink: 0;
+                    "
+                  ></div>
+                  <span style="font-size: 14px; color: var(--muted)"
+                    >Deploy e configuração completa</span
+                  >
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      width: 6px;
+                      height: 6px;
+                      border-radius: 50%;
+                      background: var(--muted);
+                      flex-shrink: 0;
+                    "
+                  ></div>
+                  <span style="font-size: 14px; color: var(--muted)"
+                    >Suporte dedicado no pós-entrega</span
+                  >
+                </div>
+              </div>
+              <div
+                style="
+                  margin-top: 24px;
+                  padding-top: 20px;
+                  border-top: 1px solid var(--dim);
+                "
+              >
+                <p class="fn">
+                  Este é o valor que cobramos de novos clientes sem histórico de
+                  parceria.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S6 A PROPOSTA (REVEAL) ===== -->
+      <div class="slide">
+        <!-- glow accent -->
+        <div
+          style="
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(100px);
+            background: rgba(201, 146, 42, 0.1);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+          "
+        ></div>
+
+        <div style="position: relative; z-index: 1">
+          <div class="small-cap" data-a style="margin-bottom: 40px">
+            Sua proposta · Condição especial de lançamento
+          </div>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 0;
+              margin-bottom: 48px;
+            "
+          >
+            <div
+              style="padding-right: 60px; border-right: 1px solid var(--dim)"
+              data-a
+            >
+              <div
+                class="small-cap"
+                style="margin-bottom: 16px; color: var(--dim)"
+              >
+                Implementação
+              </div>
+              <div style="margin-bottom: 8px">
+                <span
+                  class="price-big strike"
+                  style="font-size: clamp(28px, 3.5vw, 48px)"
+                  >R$ 6.800</span
+                >
+              </div>
+              <div class="price-big gt" style="margin-top: 16px">R$ 4.250</div>
+              <div class="price-label">50% no contrato · 50% na entrega</div>
+              <div style="margin-top: 20px">
+                <span class="pill pill-gold">Você economiza R$ 2.550</span>
+              </div>
+            </div>
+
+            <div style="padding-left: 60px" data-a>
+              <div
+                class="small-cap"
+                style="margin-bottom: 16px; color: var(--dim)"
+              >
+                Mensalidade
+              </div>
+              <div style="margin-bottom: 8px">
+                <span
+                  class="price-big strike"
+                  style="font-size: clamp(28px, 3.5vw, 48px)"
+                  >R$ 590<span style="font-size: 0.45em; font-weight: 400"
+                    >/mês</span
+                  ></span
+                >
+              </div>
+              <div class="price-big gt" style="margin-top: 16px">
+                R$ 392<span
+                  style="
+                    font-size: 0.35em;
+                    font-weight: 400;
+                    color: var(--gold);
+                  "
+                  >/mês</span
+                >
+              </div>
+              <div class="price-label">
+                tudo incluso · inicia após a entrega
+              </div>
+              <div style="margin-top: 20px">
+                <span class="pill pill-gold">Você economiza R$ 198/mês</span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style="border-top: 1px solid var(--dim); padding-top: 28px"
+            data-a
+          >
+            <p
+              style="
+                font-size: 14px;
+                color: var(--muted);
+                line-height: 1.7;
+                max-width: 640px;
+              "
+            >
+              Esta condição é oferecida porque você é o primeiro cliente do
+              ramo, o que nos permite construir algo exclusivo com um parceiro
+              de confiança. A mensalidade começa apenas após a entrega — você
+              não paga infraestrutura enquanto o produto está sendo
+              desenvolvido. E tudo isso inclui o app mobile: seus investidores
+              acessam pelo celular, tablet ou navegador, sem precisar instalar
+              nada de nenhuma loja.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S7 QUEBRA DA IMPLEMENTAÇÃO ===== -->
+      <div class="slide">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 60px;
+            align-items: start;
+          "
+        >
+          <div>
+            <div class="small-cap" data-a style="margin-bottom: 16px">
+              Implementação
+            </div>
+            <div class="price-big gt" data-a>R$ 4.250</div>
+            <div class="price-label" data-a style="margin-top: 8px">
+              implementação exclusiva
+            </div>
+            <div
+              style="
+                margin-top: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+              "
+              data-a
+            >
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  font-size: 13px;
+                  padding: 8px 0;
+                  border-bottom: 1px solid var(--dim);
+                "
+              >
+                <span style="color: var(--muted)">Assinatura do contrato</span>
+                <span style="color: var(--gold-l); font-weight: 700"
+                  >R$ 2.125</span
+                >
+              </div>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  font-size: 13px;
+                  padding: 8px 0;
+                "
+              >
+                <span style="color: var(--muted)">Entrega da plataforma</span>
+                <span style="color: var(--gold-l); font-weight: 700"
+                  >R$ 2.125</span
+                >
+              </div>
+            </div>
+            <div
+              style="
+                margin-top: 20px;
+                padding: 16px 0;
+                border-top: 1px solid var(--dim);
+              "
+              data-a
+            >
+              <p class="fn" style="max-width: 220px; line-height: 1.7">
+                Você é dono do produto. Sem taxas de licença. Sem cobrança
+                enquanto o produto está sendo construído.
+              </p>
+            </div>
+          </div>
+
+          <div data-a>
+            <div class="rule" style="margin-bottom: 0"></div>
+            <div class="item">
+              <div>
+                <div class="item-name">Design Visual Completo</div>
+                <div class="item-sub">
+                  Sistema de cores, tipografia, componentes, telas
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Portal do Investidor</div>
+                <div class="item-sub">
+                  6 módulos: Dashboard, Empreendimentos, Financeiro, Jurídico,
+                  Notificações, Selo
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">API Backend</div>
+                <div class="item-sub">
+                  Autenticação, endpoints, regras de negócio, permissões
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Banco de Dados</div>
+                <div class="item-sub">
+                  Modelagem, configuração, seed inicial de dados
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Deploy & Configuração</div>
+                <div class="item-sub">
+                  Servidor, domínio, SSL, variáveis de ambiente
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">App Mobile + Web (PWA)</div>
+                <div class="item-sub">
+                  Android, iPhone e navegador — sem App Store, sem Google Play
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Onboarding</div>
+                <div class="item-sub">
+                  Treinamento de uso, documentação básica, 30 dias de suporte
+                  pós-entrega
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S8 QUEBRA DA MENSALIDADE ===== -->
+      <div class="slide">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 60px;
+            align-items: start;
+          "
+        >
+          <div>
+            <div class="small-cap" data-a style="margin-bottom: 16px">
+              Mensalidade
+            </div>
+            <div class="price-big gt" data-a>
+              R$ 392<span
+                style="font-size: 0.35em; font-weight: 400; color: var(--gold)"
+                >/mês</span
+              >
+            </div>
+            <div class="price-label" data-a style="margin-top: 8px">
+              inicia após a entrega
+            </div>
+            <div
+              style="
+                margin-top: 32px;
+                padding: 20px 0;
+                border-top: 1px solid var(--dim);
+                border-bottom: 1px solid var(--dim);
+              "
+              data-a
+            >
+              <p class="fn" style="max-width: 220px; line-height: 1.7">
+                Uma mensalidade. Tudo incluso. Nenhum custo oculto de servidor,
+                domínio ou infraestrutura para se preocupar.
+              </p>
+            </div>
+          </div>
+
+          <div data-a>
+            <div class="rule" style="margin-bottom: 0"></div>
+            <div class="item">
+              <div>
+                <div class="item-name">Servidor & Hospedagem</div>
+                <div class="item-sub">
+                  Toda infraestrutura cloud necessária para a plataforma rodar
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Banco de Dados</div>
+                <div class="item-sub">
+                  Armazenamento, backups automáticos diários
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Domínio + SSL</div>
+                <div class="item-sub">
+                  Endereço da plataforma + certificado de segurança
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Monitoramento 24/7</div>
+                <div class="item-sub">
+                  Uptime contínuo, alertas automáticos de falha
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item">
+              <div>
+                <div class="item-name">Manutenção Contínua</div>
+                <div class="item-sub">
+                  Atualizações de segurança, correções, melhorias
+                </div>
+              </div>
+              <div class="item-val">incluso</div>
+            </div>
+            <div class="item" style="border-top: 2px solid var(--dim)">
+              <div>
+                <div
+                  class="item-name"
+                  style="color: var(--gold-l); font-weight: 700"
+                >
+                  Tudo por
+                </div>
+                <div class="item-sub">Sem surpresas, sem cobranças extras</div>
+              </div>
+              <div class="item-val" style="font-size: 22px">R$ 392/mês</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S9 PRÓXIMOS PASSOS / CTA ===== -->
+      <div class="slide">
+        <div
+          style="
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+          "
+        >
+          <div
+            style="
+              width: 600px;
+              height: 600px;
+              border-radius: 50%;
+              filter: blur(130px);
+              background: rgba(201, 146, 42, 0.08);
+            "
+          ></div>
+        </div>
+
+        <div style="max-width: 720px; position: relative; z-index: 1">
+          <div class="small-cap" data-a style="margin-bottom: 36px">
+            AB | Private Investor Access · Proposta de Lançamento
+          </div>
+
+          <div class="price-big gt" data-a style="margin-bottom: 4px">
+            R$ 4.250
+          </div>
+          <div
+            style="
+              font-size: 18px;
+              color: var(--muted);
+              font-weight: 400;
+              margin-bottom: 8px;
+            "
+            data-a
+          >
+            implementação exclusiva · 50% + 50%
+          </div>
+          <div
+            class="price-big"
+            data-a
+            style="font-size: clamp(28px, 3.5vw, 52px); color: var(--text)"
+          >
+            + R$ 392<span
+              style="font-size: 0.45em; font-weight: 300; color: var(--muted)"
+              >/mês</span
+            >
+          </div>
+          <div
+            style="
+              font-size: 15px;
+              color: var(--muted);
+              font-weight: 400;
+              margin-bottom: 48px;
+            "
+            data-a
+          >
+            tudo incluso · inicia após a entrega
+          </div>
+
+          <div
+            style="
+              border-top: 1px solid var(--dim);
+              padding-top: 36px;
+              display: flex;
+              gap: 48px;
+              align-items: flex-start;
+            "
+            data-a
+          >
+            <div>
+              <div class="small-cap" style="margin-bottom: 12px">
+                Para fechar
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px">
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      width: 22px;
+                      height: 22px;
+                      border-radius: 50%;
+                      background: var(--gold-dim);
+                      border: 1px solid rgba(201, 146, 42, 0.3);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 11px;
+                      font-weight: 700;
+                      color: var(--gold-l);
+                      flex-shrink: 0;
+                    "
+                  >
+                    1
+                  </div>
+                  <span style="font-size: 14px; color: var(--muted)"
+                    >Confirmar a proposta por escrito</span
+                  >
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      width: 22px;
+                      height: 22px;
+                      border-radius: 50%;
+                      background: var(--gold-dim);
+                      border: 1px solid rgba(201, 146, 42, 0.3);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 11px;
+                      font-weight: 700;
+                      color: var(--gold-l);
+                      flex-shrink: 0;
+                    "
+                  >
+                    2
+                  </div>
+                  <span style="font-size: 14px; color: var(--muted)"
+                    >Assinatura do contrato de prestação</span
+                  >
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      width: 22px;
+                      height: 22px;
+                      border-radius: 50%;
+                      background: var(--gold-dim);
+                      border: 1px solid rgba(201, 146, 42, 0.3);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 11px;
+                      font-weight: 700;
+                      color: var(--gold-l);
+                      flex-shrink: 0;
+                    "
+                  >
+                    3
+                  </div>
+                  <span style="font-size: 14px; color: var(--muted)"
+                    >R$ 2.125 no contrato · início imediato</span
+                  >
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      width: 22px;
+                      height: 22px;
+                      border-radius: 50%;
+                      background: var(--gold-dim);
+                      border: 1px solid rgba(201, 146, 42, 0.3);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 11px;
+                      font-weight: 700;
+                      color: var(--gold-l);
+                      flex-shrink: 0;
+                    "
+                  >
+                    4
+                  </div>
+                  <span style="font-size: 14px; color: var(--muted)"
+                    >R$ 2.125 na entrega · mensalidade inicia</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="small-cap" style="margin-bottom: 12px">
+                Prazo de entrega
+              </div>
+              <div
+                style="
+                  font-size: 32px;
+                  font-weight: 800;
+                  letter-spacing: -0.02em;
+                "
+              >
+                18 dias
+              </div>
+              <div style="font-size: 14px; color: var(--muted)">
+                após o início do projeto
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /deck -->
+
+    <!-- NAV DOTS -->
+    <div class="nav">
+      <div class="nav-dots" id="dots"></div>
+      <span class="nav-key">← →</span>
+    </div>
+
+    <script>
+      const slides = document.querySelectorAll(".slide");
+      const dotsEl = document.getElementById("dots");
+      let cur = 0;
+      const tot = slides.length;
+
+      // build dots
+      for (let i = 0; i < tot; i++) {
+        const d = document.createElement("div");
+        d.className = "nav-dot" + (i === 0 ? " on" : "");
+        d.addEventListener("click", (e) => {
+          e.stopPropagation();
+          goTo(i);
+        });
+        dotsEl.appendChild(d);
+      }
+
+      function updateDots() {
+        dotsEl.querySelectorAll(".nav-dot").forEach((d, i) => {
+          d.classList.toggle("on", i === cur);
+        });
+      }
+
+      function goTo(n) {
+        if (n < 0 || n >= tot) return;
+        slides[cur].classList.remove("active");
+        cur = n;
+        slides[cur].classList.add("active");
+        updateDots();
+        animate(slides[cur]);
+      }
+
+      function animate(slide) {
+        slide.querySelectorAll("[data-a],[data-f]").forEach((el, i) => {
+          el.classList.remove("go");
+          void el.offsetWidth;
+          el.style.animationDelay = i * 0.08 + "s";
+          el.classList.add("go");
+        });
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          e.preventDefault();
+          goTo(cur + 1);
+        }
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          goTo(cur - 1);
+        }
+      });
+      document.addEventListener("click", (e) => {
+        if (e.target.closest(".nav")) return;
+        goTo(cur + (e.clientX > innerWidth / 2 ? 1 : -1));
+      });
+      let tx = 0;
+      document.addEventListener(
+        "touchstart",
+        (e) => (tx = e.touches[0].clientX),
+      );
+      document.addEventListener("touchend", (e) => {
+        const d = tx - e.changedTouches[0].clientX;
+        if (Math.abs(d) > 50) goTo(cur + (d > 0 ? 1 : -1));
+      });
+
+      goTo(0);
+    </script>
+  </body>
+</html>
